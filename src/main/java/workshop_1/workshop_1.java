@@ -22,7 +22,7 @@ import static java.util.Calendar.*;
 
 public class workshop_1 {
     //stałe
-    private static final String FILE_NAME = "tasks2" + ".csv";
+    private static final String FILE_NAME = "tasks.csv";
     private static final String[] OPTIONS = {"a - add", "r - remove", "l - list", "e - exit"};
     private static final String[] OPTIONS_N = {"a - add", "e - exit"};
     
@@ -121,7 +121,7 @@ public class workshop_1 {
                 System.out.println("Value was successfully deleted.\n");
                 //printTab(tab);
             } else {
-                System.out.println("Enter correct index");
+                System.out.println(ConsoleColors.RED_UNDERLINED+"Enter correct index"+ConsoleColors.RESET);
             }
         } catch (ArrayIndexOutOfBoundsException ex) {
             System.out.println("Element not exist in tab");
@@ -306,7 +306,6 @@ public class workshop_1 {
                 System.out.print(ConsoleColors.RESET);
                 System.out.print(ConsoleColors.GREEN);
             }
-            
         }
         //linia pozioma końcowa
         System.out.print(" |");
@@ -314,18 +313,7 @@ public class workshop_1 {
         System.out.println("|");
         System.out.print(ConsoleColors.RESET);
     }
-
-
-//    public static void createFile(String fileName) {
-//        Path path = Paths.get(fileName);
-//        if (Files.exists(path) == false) {
-//            try {
-//                Files.createFile(path);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+    
     
     public static int fileSize(String fileName) throws IOException {
         //File newFile = new File(fileName);
@@ -342,7 +330,7 @@ public class workshop_1 {
             e.printStackTrace();
         }
         assert zapis != null;
-        zapis.println("TaskName,DueDate,Importance");
+        zapis.println("Task Name,Due Date,Importance");
         zapis.close();
     }
     
@@ -353,6 +341,4 @@ public class workshop_1 {
         }
         return max;
     }
-    
-    
 }
