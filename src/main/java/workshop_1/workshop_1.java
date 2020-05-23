@@ -13,14 +13,16 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
-
 import java.util.List;
 import java.util.Scanner;
 
+import static java.util.Calendar.*;
+
 public class workshop_1 {
     //stałe
-    private static final String FILE_NAME = "tasks1.csv";
+    private static final String FILE_NAME = "tasks2" + ".csv";
     private static final String[] OPTIONS = {"a - add", "r - remove", "l - list", "e - exit"};
     private static final String[] OPTIONS_N = {"a - add", "e - exit"};
     
@@ -57,6 +59,7 @@ public class workshop_1 {
                     break;
                 case "l":
                     printTab(tasks);
+                    System.out.println("\nReprinted\n");
                     break;
                 default:
                     System.out.println("Please select a correct option.");
@@ -96,14 +99,14 @@ public class workshop_1 {
     }
     
     public static void addTask() {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner1 = new Scanner(System.in);
         System.out.println("Please add task description");
-        String desc = scanner.nextLine();
+        String desc = scanner1.nextLine();
         System.out.print("Please add task due date: dd-mm-yyyy format. ");
         String dueDat;
-        dueDat = readDate(scanner);
+        dueDat = readDate(scanner1);
         System.out.println("Is your task is important: 1/0");
-        String isImp = pobierzWart(scanner).toString();
+        String isImp = pobierzWart(scanner1).toString();
         tasks = Arrays.copyOf(tasks, tasks.length + 1);
         tasks[tasks.length - 1] = new String[3];
         tasks[tasks.length - 1][0] = desc;
@@ -126,13 +129,13 @@ public class workshop_1 {
     }
     
     public static int getTheNumber() {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner3 = new Scanner(System.in);
         System.out.println("Please select number to remove.");
         
-        String n = scanner.nextLine();
+        String n = scanner3.nextLine();
         while (!isNumberGreaterZero(n)) {
             System.out.println("Incorrect argument passed. Please give number greater 0");
-            n = scanner.nextLine();
+            n = scanner3.nextLine();
         }
         return Integer.parseInt(n);
     }
@@ -146,18 +149,24 @@ public class workshop_1 {
     
     public static String readDate(Scanner sc) {
         System.out.print(ConsoleColors.GREEN);
-        String inputDate;
+        String inputDate;//if date entered
         Date parsedDate = null;
+        int days = 0;//days from today
+        //Date newDate;
         int compareDates = 0;
         String wrongMsg = "Enter correct date in dd-mm-yyyy format";
-        
+        System.out.println("You can enter: 1 - for today+1, etc.");
         DateFormat dateF = new SimpleDateFormat("dd-MM-yyyy");
-        Date todayObj = new Date();
-        String today = dateF.format(todayObj);
+        Date todayObj = new Date();//dzisiejsza data
+        String today = dateF.format(todayObj);//dzisiejsza data String dd-mm-yyyy
         System.out.println("Today is: " + today);
-        
+        //wprowadzenie daty - kontrola poprawności
         while (true) {
-            inputDate = sc.nextLine();
+            inputDate = sc.nextLine();//SKANOWANIE
+            if (inputDate.length() < 10) {
+                days = Integer.parseInt(inputDate);
+                break;//podanie dni+today
+            }
             try {
                 parsedDate = dateF.parse(inputDate);
                 compareDates = parsedDate.compareTo(todayObj);//porównanie dat w formacie Date
@@ -165,6 +174,7 @@ public class workshop_1 {
             }
             if (isValidDate(inputDate)) {
                 if (compareDates > 0) {
+                    inputDate = dateF.format(parsedDate);
                     break;
                 } else {
                     System.out.println("Please enter future date");
@@ -172,9 +182,23 @@ public class workshop_1 {
             } else
                 System.out.println(wrongMsg);
         }
+        
         System.out.print(ConsoleColors.RESET);
         //return inputDate;
-        return dateF.format(parsedDate);
+        if (days != 0) {
+            inputDate = dateF.format(dateAdd(todayObj, days));
+        }
+        System.out.println("Your date: " + inputDate);
+        
+        return inputDate;
+    }
+    
+    public static Date dateAdd(Date date, int days) {
+        Calendar c = getInstance();
+        c.setTime(date);
+        c.add(DATE, days);
+        date = c.getTime();
+        return date;
     }
     
     public static void printOptions(String[] tab) {
@@ -329,4 +353,6 @@ public class workshop_1 {
         }
         return max;
     }
+    
+    
 }
