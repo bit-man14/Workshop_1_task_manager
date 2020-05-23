@@ -1,7 +1,332 @@
 package workshop_1;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+
+import java.util.List;
+import java.util.Scanner;
+
 public class workshop_1 {
+    //stałe
+    private static final String FILE_NAME = "tasks1.csv";
+    private static final String[] OPTIONS = {"a - add", "r - remove", "l - list", "e - exit"};
+    private static final String[] OPTIONS_N = {"a - add", "e - exit"};
+    
+    private static String[][] tasks;
+    
+    
     public static void main(String[] args) {
-        System.out.println("test5");
+        startUp();//initial actions: file to array
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
+            if (tasks.length == 1) {//dla ograniczonych opcji
+                while (true) {
+                    if (input.matches("[ae]")) {//permitted
+                        break;
+                    } else {
+                        System.out.println(ConsoleColors.RED_UNDERLINED + "Choose available option!" + ConsoleColors.RESET);
+                        input = scanner.nextLine();
+                    }
+                }
+            }
+            switch (input) {
+                case "e":
+                    saveTabToFile(FILE_NAME, tasks);
+                    System.out.println(ConsoleColors.RED + "File updated. Exiting.");
+                    System.exit(0);
+                    break;
+                case "a":
+                    addTask();
+                    break;
+                case "r":
+                    removeTask(tasks, getTheNumber());
+                    //System.out.println("Value was successfully deleted.");
+                    break;
+                case "l":
+                    printTab(tasks);
+                    break;
+                default:
+                    System.out.println("Please select a correct option.");
+            }
+            //startUp();
+            if (tasks.length == 1) {
+                printOptions(OPTIONS_N);
+            } else {
+                printTab(tasks);
+                System.out.println();
+                printOptions(OPTIONS);
+            }
+        }//main loop
+    }
+    
+    public static void startUp() {
+        try {
+            //czy plik istnieje i ma więcej linii niż nagłówek
+            if (Files.exists(Paths.get(FILE_NAME)) && fileSize(FILE_NAME) > 1) {
+                System.out.println(ConsoleColors.BLUE + "Reading data from file " + FILE_NAME + ConsoleColors.RESET);
+                tasks = loadDataToTab(FILE_NAME);
+                printTab(tasks);
+                System.out.println();
+                printOptions(OPTIONS);//full opcja
+            } else {
+                System.out.println("File to be used: " + Paths.get(FILE_NAME));
+                //FILE_NAME.length();
+                System.out.println(ConsoleColors.RED_UNDERLINED + "No existing file or file contains no data" + ConsoleColors.RESET);
+                //createFile(FILE_NAME);//utwórz pusty plik
+                newFileAndHeader(FILE_NAME);//utwórz plik i wstaw nagłówki
+                tasks = loadDataToTab(FILE_NAME);
+                printOptions(OPTIONS_N);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void addTask() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please add task description");
+        String desc = scanner.nextLine();
+        System.out.print("Please add task due date: dd-mm-yyyy format. ");
+        String dueDat;
+        dueDat = readDate(scanner);
+        System.out.println("Is your task is important: 1/0");
+        String isImp = pobierzWart(scanner).toString();
+        tasks = Arrays.copyOf(tasks, tasks.length + 1);
+        tasks[tasks.length - 1] = new String[3];
+        tasks[tasks.length - 1][0] = desc;
+        tasks[tasks.length - 1][1] = dueDat;
+        tasks[tasks.length - 1][2] = isImp;
+    }
+    
+    public static void removeTask(String[][] tab, int index) {
+        try {
+            if (index < tab.length) {
+                tasks = ArrayUtils.remove(tab, index);
+                System.out.println("Value was successfully deleted.\n");
+                //printTab(tab);
+            } else {
+                System.out.println("Enter correct index");
+            }
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.out.println("Element not exist in tab");
+        }
+    }
+    
+    public static int getTheNumber() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please select number to remove.");
+        
+        String n = scanner.nextLine();
+        while (!isNumberGreaterZero(n)) {
+            System.out.println("Incorrect argument passed. Please give number greater 0");
+            n = scanner.nextLine();
+        }
+        return Integer.parseInt(n);
+    }
+    
+    public static boolean isNumberGreaterZero(String input) {
+        
+        if (NumberUtils.isParsable(input)) {
+            return Integer.parseInt(input) > 0;
+        } else return false;
+    }
+    
+    public static String readDate(Scanner sc) {
+        System.out.print(ConsoleColors.GREEN);
+        String inputDate;
+        Date parsedDate = null;
+        int compareDates = 0;
+        String wrongMsg = "Enter correct date in dd-mm-yyyy format";
+        
+        DateFormat dateF = new SimpleDateFormat("dd-MM-yyyy");
+        Date todayObj = new Date();
+        String today = dateF.format(todayObj);
+        System.out.println("Today is: " + today);
+        
+        while (true) {
+            inputDate = sc.nextLine();
+            try {
+                parsedDate = dateF.parse(inputDate);
+                compareDates = parsedDate.compareTo(todayObj);//porównanie dat w formacie Date
+            } catch (ParseException ignored) {
+            }
+            if (isValidDate(inputDate)) {
+                if (compareDates > 0) {
+                    break;
+                } else {
+                    System.out.println("Please enter future date");
+                }
+            } else
+                System.out.println(wrongMsg);
+        }
+        System.out.print(ConsoleColors.RESET);
+        //return inputDate;
+        return dateF.format(parsedDate);
+    }
+    
+    public static void printOptions(String[] tab) {
+        System.out.println(ConsoleColors.BLUE + "Please select an option: " + ConsoleColors.RESET);
+        for (String option : tab) {
+            System.out.println(option);
+        }
+    }
+    
+    //is it date in proper format
+    public static boolean isValidDate(String inDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(inDate.trim());
+        } catch (ParseException pe) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    public static Character pobierzWart(Scanner scan) {
+        char imp;
+        while (true) {
+            imp = scan.next().charAt(0);
+            if (imp == '0' || imp == '1') {
+                break;
+            }
+            System.out.print("Podaj 1 - ważne lub 0 -  mniej ważne:");
+        }
+        return imp;
+    }
+    
+    public static void saveTabToFile(String fileName, String[][] tab) {
+        Path dir = Paths.get(fileName);
+        
+        String[] lines = new String[tasks.length];
+        
+        for (int i = 0; i < tab.length; i++) {
+            lines[i] = String.join(",", tab[i]);
+        }
+        
+        try {
+            Files.write(dir, Arrays.asList(lines));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public static String[][] loadDataToTab(String fileName) {
+        Path dir = Paths.get(fileName);
+        if (!Files.exists(dir)) {
+            System.out.println("No existing file or file is empty.");
+            printOptions(OPTIONS_N);
+            System.exit(0);
+        }
+        String[][] tab = null;
+        try {
+            List<String> strings = Files.readAllLines(dir);
+            if (strings.size() == 1) {//jedna linia w pliku
+                System.out.println("File contains only header");
+            }
+            tab = new String[strings.size()][3];
+            //tab = new String[strings.size()][strings.get(0).split(",").length];
+            
+            for (int i = 0; i < strings.size(); i++) {
+                String[] split = strings.get(i).split(",");
+                System.arraycopy(split, 0, tab[i], 0, 3);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tab;
+    }
+    
+    //wydruk zawartości
+    public static void printTab(String[][] tab) {
+        int offSet = 33;
+        int maxLen = maxTaskLen(tasks) + 2;
+        if (maxLen < 11) maxLen = 11;
+        String colFormat = " | %-2s";//index
+        String colFormat1 = " | %-" + maxLen + "s";//task
+        String colFormat2 = " | %-" + 10 + "s";//date, imp
+        System.out.print(ConsoleColors.BLUE_BOLD);
+        System.out.print(" |");//linia pozioma przed nagłówkiem
+        System.out.print("-".repeat(maxLen + offSet));
+        System.out.println("|");
+        for (int i = 0; i < tab.length; i++) {
+            System.out.format(colFormat, i);//szerokość dla indeksu
+            for (int j = 0; j < tab[i].length; j++) {
+                if (j == 0) {
+                    System.out.format(colFormat1, tab[i][j]);//szerokość dla zadania
+                } else {
+                    System.out.format(colFormat2, tab[i][j]);//szerokość dla date, imp
+                }
+            }
+            System.out.println(" |");
+            //linia pozioma po nagłówku
+            if (i == 0) {
+                
+                System.out.print(" |");
+                System.out.print("-".repeat(maxLen + offSet));
+                System.out.println("|");
+                System.out.print(ConsoleColors.RESET);
+                System.out.print(ConsoleColors.GREEN);
+            }
+            
+        }
+        //linia pozioma końcowa
+        System.out.print(" |");
+        System.out.print("-".repeat(maxLen + offSet));
+        System.out.println("|");
+        System.out.print(ConsoleColors.RESET);
+    }
+
+
+//    public static void createFile(String fileName) {
+//        Path path = Paths.get(fileName);
+//        if (Files.exists(path) == false) {
+//            try {
+//                Files.createFile(path);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+    
+    public static int fileSize(String fileName) throws IOException {
+        //File newFile = new File(fileName);
+        Path dir = Paths.get(fileName);
+        List<String> strings = Files.readAllLines(dir);
+        return strings.size();
+    }
+    
+    public static void newFileAndHeader(String fileName) {
+        PrintWriter zapis = null;
+        try {
+            zapis = new PrintWriter(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        assert zapis != null;
+        zapis.println("TaskName,DueDate,Importance");
+        zapis.close();
+    }
+    
+    public static int maxTaskLen(String[][] tab) {
+        int max = 0;//max length of task descr.
+        for (int i = 1; i < tab.length; i++) {
+            if (tab[i][0].length() > max) max = tab[i][0].length();
+        }
+        return max;
     }
 }

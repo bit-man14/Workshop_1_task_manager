@@ -12,4 +12,14 @@
         <maven.compiler.source>12</maven.compiler.source>
     </properties>
 
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <dependencies>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.10</version>
+    </dependency>
+
+    </dependencies>
+
 </project>
