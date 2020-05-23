@@ -22,7 +22,7 @@ import static java.util.Calendar.*;
 
 public class workshop_1 {
     //stałe
-    private static final String FILE_NAME = "tasks.csv";
+    private static final String FILE_NAME = "Tasks.csv";
     private static final String[] OPTIONS = {"a - add", "r - remove", "l - list", "e - exit"};
     private static final String[] OPTIONS_N = {"a - add", "e - exit"};
     
@@ -102,7 +102,8 @@ public class workshop_1 {
         Scanner scanner1 = new Scanner(System.in);
         System.out.println("Please add task description");
         String desc = scanner1.nextLine();
-        System.out.print("Please add task due date: dd-mm-yyyy format. ");
+        System.out.println("Please add task due date: dd-mm-yyyy format ");
+        System.out.print("or number of days since today. ");
         String dueDat;
         dueDat = readDate(scanner1);
         System.out.println("Is your task is important: 1/0");
@@ -121,7 +122,7 @@ public class workshop_1 {
                 System.out.println("Value was successfully deleted.\n");
                 //printTab(tab);
             } else {
-                System.out.println(ConsoleColors.RED_UNDERLINED+"Enter correct index"+ConsoleColors.RESET);
+                System.out.println(ConsoleColors.RED_UNDERLINED + "Enter correct index" + ConsoleColors.RESET);
             }
         } catch (ArrayIndexOutOfBoundsException ex) {
             System.out.println("Element not exist in tab");
@@ -151,27 +152,32 @@ public class workshop_1 {
         System.out.print(ConsoleColors.GREEN);
         String inputDate;//if date entered
         Date parsedDate = null;
-        int days = 0;//days from today
+        int days;//days from today
         //Date newDate;
         int compareDates = 0;
         String wrongMsg = "Enter correct date in dd-mm-yyyy format";
-        System.out.println("You can enter: 1 - for today+1, etc.");
+//        System.out.println("You can enter: 1 - for today+1, etc.");
         DateFormat dateF = new SimpleDateFormat("dd-MM-yyyy");
         Date todayObj = new Date();//dzisiejsza data
         String today = dateF.format(todayObj);//dzisiejsza data String dd-mm-yyyy
         System.out.println("Today is: " + today);
         //wprowadzenie daty - kontrola poprawności
+        
+        
         while (true) {
             inputDate = sc.nextLine();//SKANOWANIE
-            if (inputDate.length() < 10) {
+            if (inputDate.length() < 8) {
                 days = Integer.parseInt(inputDate);
-                break;//podanie dni+today
+                inputDate = dateF.format(dateAdd(todayObj, days));
+                //break;//podanie dni+today
             }
             try {
                 parsedDate = dateF.parse(inputDate);
                 compareDates = parsedDate.compareTo(todayObj);//porównanie dat w formacie Date
             } catch (ParseException ignored) {
             }
+            
+            //czy data z przyszłości
             if (isValidDate(inputDate)) {
                 if (compareDates > 0) {
                     inputDate = dateF.format(parsedDate);
@@ -185,9 +191,9 @@ public class workshop_1 {
         
         System.out.print(ConsoleColors.RESET);
         //return inputDate;
-        if (days != 0) {
-            inputDate = dateF.format(dateAdd(todayObj, days));
-        }
+//        if (days != 0) {
+//            inputDate = dateF.format(dateAdd(todayObj, days));
+//        }
         System.out.println("Your date: " + inputDate);
         
         return inputDate;
@@ -228,7 +234,7 @@ public class workshop_1 {
             if (imp == '0' || imp == '1') {
                 break;
             }
-            System.out.print("Podaj 1 - ważne lub 0 -  mniej ważne:");
+            System.out.print("Enter 1 - important lub 0 -  not so imp.");
         }
         return imp;
     }
