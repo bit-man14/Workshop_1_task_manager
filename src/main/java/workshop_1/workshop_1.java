@@ -227,7 +227,7 @@ public class workshop_1 {
     public static Character readImp(Scanner scan) {
         char imp;
         while (true) {
-            imp = scan.next().charAt(0);
+            imp = scan.next().charAt(0);//czyta tylko pierwszy znak
             if (imp == '0' || imp == '1') {
                 break;
             }
