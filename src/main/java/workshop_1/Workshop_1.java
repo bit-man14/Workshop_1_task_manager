@@ -20,7 +20,7 @@ import java.util.Scanner;
 
 import static java.util.Calendar.*;
 
-public class workshop_1 {
+public class Workshop_1 {
     //stałe
     private static final String TASKS_CSV = "Tasks.csv";
     //wszystkie opcje
